@@ -1,4 +1,4 @@
-import chisel3._
+/* import chisel3._
 import chisel3.util._
 
 class Mem_read(xlen:Int) extends BlackBox {
@@ -54,3 +54,4 @@ class DSRAM(xlen:Int) extends Module {
   io.ss.rvalid     := mem_read.io.rvalid
   io.ss.wdone      := mem_write.io.wdone
 }
+ */

@@ -9,10 +9,10 @@
 // 包含Verilator提供的verilated.h头文件，这是进行Verilog模拟所必需的
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为Vtop.h，它包含了模拟所需的类定义
-#include "Vtop.h"
+// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为VysyxSoCFull.h，它包含了模拟所需的类定义
+#include "VysyxSoCFull.h"
 // INCLUDE MODULE CLASSES
-#include "Vtop___024root.h"
+#include "VysyxSoCFull___024root.h"
 
 void init_sdb() {
   /* Compile the regular expressions. */
@@ -44,7 +44,7 @@ static int cmd_c(char *args) {
   return -1;
 }
 
-extern Vtop *top;
+extern VysyxSoCFull *top;
 extern VerilatedVcdC *m_trace;
 static int cmd_q(char *args) {
   //npc_state.state = NPC_QUIT;

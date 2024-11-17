@@ -9,10 +9,10 @@
 // 包含Verilator提供的verilated.h头文件，这是进行Verilog模拟所必需的
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为Vtop.h，它包含了模拟所需的类定义
-#include "Vtop.h"
+// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为VysyxSoCFull.h，它包含了模拟所需的类定义
+#include "VysyxSoCFull.h"
 // INCLUDE MODULE CLASSES
-#include "Vtop___024root.h"
+#include "VysyxSoCFull___024root.h"
 
 void (*ref_difftest_memcpy)(uint32_t addr, void *buf, size_t n, bool direction) = NULL;
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
@@ -86,7 +86,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   //printf("%08x\n",cpu.pc);
 }
 
-extern Vtop *top;
+extern VysyxSoCFull *top;
 
 extern VerilatedVcdC *m_trace;
 
@@ -104,11 +104,11 @@ static bool isa_difftest_checkregs(CPU_state *ref_r, uint32_t pc) {
       break;
     }
   }
-  if(top->rootp->top__DOT__ifu__DOT__pc__DOT__pc != ref_r->pc)
+  if(top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__pc__DOT__pc != ref_r->pc)
   {
     printf("*****different pc:%08x %08x\n", cpu.pc, ref_r->pc);
   }
-  if(s && top->rootp->top__DOT__ifu__DOT__pc__DOT__pc == ref_r->pc)
+  if(s && top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__pc__DOT__pc == ref_r->pc)
   {
     return true;
   }

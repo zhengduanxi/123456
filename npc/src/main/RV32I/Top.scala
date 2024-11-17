@@ -4,8 +4,11 @@ import chisel3.util.DecoupledIO
 class TopIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   // val clk_mem = Input(Clock())
   // val inst    = Input(UInt(dataWidth.W))
-  val addr    = Output(UInt(addrWidth.W))
-  val done    = Output(Bool())
+  // val addr    = Output(UInt(addrWidth.W))
+  // val done    = Output(Bool())
+  val interrupt = Input(Bool())
+  val master    = new MessageAXI4MasterInterface(dataWidth)
+  val slave     = Flipped(new MessageAXI4MasterInterface(dataWidth))
 }
 
 class top(val dataWidth: Int, val addrWidth: Int) extends Module {
@@ -18,17 +21,17 @@ class top(val dataWidth: Int, val addrWidth: Int) extends Module {
   val wbu     = Module(new WBU(dataWidth))
 
   val mem     = Module(new MemAccess(dataWidth, addrWidth))
-  val dsram   = Module(new DSRAM(dataWidth))
-  val arbiter = Module(new AxiArbiter(dataWidth))
-  val xbar    = Module(new Xbar(dataWidth))
-  val uart    = Module(new UART(dataWidth))
-  val clint   = Module(new CLINT(dataWidth))
+  // val dsram   = Module(new DSRAM(dataWidth))
+  val arbiter = Module(new AXI4Arbiter(dataWidth))
+  // val xbar    = Module(new Xbar(dataWidth))
+  // val uart    = Module(new UART(dataWidth))
+  // val clint   = Module(new CLINT(dataWidth))
 
-  val mem_to_arbiter_master_interface  = Module(new AxiMasterInterface(dataWidth))
-  val ifu_to_arbiter_master_interface  = Module(new AxiMasterInterface(dataWidth))
-  val xbar_to_dsram_slave_interface    = Module(new AxiSlaveInterface(dataWidth))
-  val xbar_to_uart_slave_interface     = Module(new AxiSlaveInterface(dataWidth))
-  val xbar_to_clint_slave_interface    = Module(new AxiSlaveInterface(dataWidth))
+  val mem_to_arbiter_master_interface  = Module(new AXI4MasterInterface(dataWidth))
+  val ifu_to_arbiter_master_interface  = Module(new AXI4MasterInterface(dataWidth))
+  // val xbar_to_dsram_slave_interface    = Module(new AxiSlaveInterface(dataWidth))
+  // val xbar_to_uart_slave_interface     = Module(new AxiSlaveInterface(dataWidth))
+  // val xbar_to_clint_slave_interface    = Module(new AxiSlaveInterface(dataWidth))
 
   StageConnect(ifu.io.out, idu.io.in)
   StageConnect(idu.io.out, exu.io.in)
@@ -36,9 +39,21 @@ class top(val dataWidth: Int, val addrWidth: Int) extends Module {
   StageConnect(meu.io.out, wbu.io.in)
   StageConnect(wbu.io.out, ifu.io.in)
 
+  io.slave.awready := 0.B
+  io.slave.wready  := 0.B
+  io.slave.bvalid  := 0.B
+  io.slave.bresp   := 0.U
+  io.slave.bid     := 0.U
+  io.slave.arready := 0.B
+  io.slave.rvalid  := 0.B
+  io.slave.rresp   := 0.U
+  io.slave.rdata   := 0.U
+  io.slave.rlast   := 0.U
+  io.slave.rid     := 0.U
+
   // ifu.io.inst := io.inst
-  io.addr := ifu.io.addr
-  io.done := ifu.io.done
+  // io.addr := ifu.io.addr
+  // io.done := ifu.io.done
 
   // meu <=> meu
   mem.io.meu_valid := meu.io.meu_valid
@@ -54,22 +69,24 @@ class top(val dataWidth: Int, val addrWidth: Int) extends Module {
   // mem <=> master interface
   mem.io.mm <> mem_to_arbiter_master_interface.io.mm
   // master interface <=> arbiter
-  ifu_to_arbiter_master_interface.io.ma <> arbiter.io.ma1
-  mem_to_arbiter_master_interface.io.ma <> arbiter.io.ma2
+  ifu_to_arbiter_master_interface.io.ma <> arbiter.io.slave1
+  mem_to_arbiter_master_interface.io.ma <> arbiter.io.slave2
   // arbiter <=> Xbar
-  arbiter.io.sa1 <> xbar.io.ax
+  // arbiter.io.sa1 <> xbar.io.ax
   // Xbar <=> dsram slave interface
-  xbar.io.xbar_dsram <> xbar_to_dsram_slave_interface.io.sa
+  // arbiter <=> cpu master
+  arbiter.io.master1 <> io.master
+  // xbar.io.xbar_dsram <> xbar_to_dsram_slave_interface.io.sa
   // Xbar <=> uart slave interface
-  xbar.io.xbar_uart <> xbar_to_uart_slave_interface.io.sa
+  // xbar.io.xbar_uart <> xbar_to_uart_slave_interface.io.sa
   // Xbar <=> clint slave interface
-  xbar.io.xbar_clint <> xbar_to_clint_slave_interface.io.sa
+  // xbar.io.xbar_clint <> xbar_to_clint_slave_interface.io.sa
   // dsram slave interface <=> dsram
-  xbar_to_dsram_slave_interface.io.ss <> dsram.io.ss
+  // xbar_to_dsram_slave_interface.io.ss <> dsram.io.ss
   // uart slave interface <=> uart
-  xbar_to_uart_slave_interface.io.ss <> uart.io.su
+  // xbar_to_uart_slave_interface.io.ss <> uart.io.su
   // clint slave interface <=> clint
-  xbar_to_clint_slave_interface.io.ss <> clint.io.sc
+  // xbar_to_clint_slave_interface.io.ss <> clint.io.sc
 
   ifu.io.ACLK    := clock
   ifu.io.ARESETn := !(reset.asBool)
@@ -77,20 +94,20 @@ class top(val dataWidth: Int, val addrWidth: Int) extends Module {
   mem.io.ACLK    := clock
   mem.io.ARESETn := !(reset.asBool)
 
-  dsram.io.ACLK    := clock
-  dsram.io.ARESETn := !(reset.asBool)
+  // dsram.io.ACLK    := clock
+  // dsram.io.ARESETn := !(reset.asBool)
 
   arbiter.io.ACLK    := clock
   arbiter.io.ARESETn := !(reset.asBool)
 
-  xbar.io.ACLK    := clock
-  xbar.io.ARESETn := !(reset.asBool)
+  // xbar.io.ACLK    := clock
+  // xbar.io.ARESETn := !(reset.asBool)
 
-  uart.io.ACLK    := clock
-  uart.io.ARESETn := !(reset.asBool)
+  // uart.io.ACLK    := clock
+  // uart.io.ARESETn := !(reset.asBool)
 
-  clint.io.ACLK    := clock
-  clint.io.ARESETn := !(reset.asBool)
+  // clint.io.ACLK    := clock
+  // clint.io.ARESETn := !(reset.asBool)
 
   mem_to_arbiter_master_interface.io.ACLK     :=  clock
   mem_to_arbiter_master_interface.io.ARESETn  := !(reset.asBool)
@@ -98,14 +115,14 @@ class top(val dataWidth: Int, val addrWidth: Int) extends Module {
   ifu_to_arbiter_master_interface.io.ACLK     :=  clock
   ifu_to_arbiter_master_interface.io.ARESETn  := !(reset.asBool)
 
-  xbar_to_dsram_slave_interface.io.ACLK    :=  clock
-  xbar_to_dsram_slave_interface.io.ARESETn := !(reset.asBool) 
+  // xbar_to_dsram_slave_interface.io.ACLK    :=  clock
+  // xbar_to_dsram_slave_interface.io.ARESETn := !(reset.asBool) 
 
-  xbar_to_uart_slave_interface.io.ACLK    :=  clock
-  xbar_to_uart_slave_interface.io.ARESETn := !(reset.asBool) 
+  // xbar_to_uart_slave_interface.io.ACLK    :=  clock
+  // xbar_to_uart_slave_interface.io.ARESETn := !(reset.asBool) 
 
-  xbar_to_clint_slave_interface.io.ACLK    :=  clock
-  xbar_to_clint_slave_interface.io.ARESETn := !(reset.asBool) 
+  // xbar_to_clint_slave_interface.io.ACLK    :=  clock
+  // xbar_to_clint_slave_interface.io.ARESETn := !(reset.asBool) 
 }
 
 object StageConnect {

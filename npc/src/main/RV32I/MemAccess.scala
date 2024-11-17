@@ -8,7 +8,7 @@ class MemAccessIO(dataWidth: Int, addrWidth: Int) extends Bundle {
   val ARESETn   = Input(Reset())
 
   /* Mem <=> Master interface */
-  val mm        =  Flipped(new MessageMM(dataWidth))
+  val mm        =  Flipped(new MessageAXI4ToMaster(dataWidth))
 
   /* MEU <=> Mem */
   val meu_valid = Input(Bool())
@@ -62,33 +62,47 @@ class MemAccess(val dataWidth: Int, val addrWidth: Int) extends Module {
   io.mm.wmask  := wmask
   io.mem_valid := Mux(st_valid===1.U || ld_valid===1.U, io.mm.rvalid || io.mm.wdone, 1.B)
 
+  io.mm.arsize := MuxLookup(io.ld_type, 2.U(3.W))(
+    Seq(LD_LB  -> 0.U(3.W),
+        LD_LBU -> 0.U(3.W),
+        LD_LH  -> 1.U(3.W),
+        LD_LHU -> 1.U(3.W),
+        LD_LW  -> 2.U(3.W),
+      ))
+
+  io.mm.awsize := MuxLookup(io.ld_type, 2.U(3.W))(
+    Seq(ST_SB  -> 0.U(3.W),
+        ST_SH  -> 1.U(3.W),
+        ST_SW  -> 2.U(3.W),
+      ))
+
 
   io.rd_data := MuxLookup(Cat(io.addr(1, 0), io.ld_type), 0.S(32.W))(
     Seq(Cat(0.U(2.W), LD_LB)  -> rdata(7,  0).asSInt,
-        Cat(1.U(2.W), LD_LB)  -> rdata(7,  0).asSInt,
-        Cat(2.U(2.W), LD_LB)  -> rdata(7,  0).asSInt,
-        Cat(3.U(2.W), LD_LB)  -> rdata(7,  0).asSInt,
+        Cat(1.U(2.W), LD_LB)  -> rdata(15, 8).asSInt,
+        Cat(2.U(2.W), LD_LB)  -> rdata(23, 16).asSInt,
+        Cat(3.U(2.W), LD_LB)  -> rdata(31, 24).asSInt,
         Cat(0.U(2.W), LD_LH)  -> rdata(15, 0).asSInt,
-        Cat(2.U(2.W), LD_LH)  -> rdata(15, 0).asSInt,
+        Cat(2.U(2.W), LD_LH)  -> rdata(31, 16).asSInt,
         Cat(0.U(2.W), LD_LW)  -> rdata.asSInt,
-        Cat(1.U(2.W), LD_LW)  -> rdata.asSInt,
-        Cat(2.U(2.W), LD_LW)  -> rdata.asSInt,
-        Cat(3.U(2.W), LD_LW)  -> rdata.asSInt,
+        // Cat(1.U(2.W), LD_LW)  -> rdata.asSInt,
+        // Cat(2.U(2.W), LD_LW)  -> rdata.asSInt,
+        // Cat(3.U(2.W), LD_LW)  -> rdata.asSInt,
         Cat(0.U(2.W), LD_LBU) -> Cat("h0".U, rdata(7,  0)).asSInt,
-        Cat(1.U(2.W), LD_LBU) -> Cat("h0".U, rdata(7,  0)).asSInt,
-        Cat(2.U(2.W), LD_LBU) -> Cat("h0".U, rdata(7,  0)).asSInt,
-        Cat(3.U(2.W), LD_LBU) -> Cat("h0".U, rdata(7,  0)).asSInt,
+        Cat(1.U(2.W), LD_LBU) -> Cat("h0".U, rdata(15, 8)).asSInt,
+        Cat(2.U(2.W), LD_LBU) -> Cat("h0".U, rdata(23, 16)).asSInt,
+        Cat(3.U(2.W), LD_LBU) -> Cat("h0".U, rdata(31, 24)).asSInt,
         Cat(0.U(2.W), LD_LHU) -> Cat("h0".U, rdata(15, 0)).asSInt,
-        Cat(2.U(2.W), LD_LHU) -> Cat("h0".U, rdata(15, 0)).asSInt
+        Cat(2.U(2.W), LD_LHU) -> Cat("h0".U, rdata(31, 16)).asSInt
       )).asUInt
 
-  wmask := MuxLookup(Cat(io.ld_type), 0.U(8.W))(
-    Seq(Cat(LD_LB)   -> "b00000001".U,
-        Cat(LD_LH)   -> "b00000010".U,
-        Cat(LD_LW)   -> "b00000100".U,
-        Cat(LD_LBU)  -> "b00000001".U,
-        Cat(LD_LHU)  -> "b00000010".U,
-      ))
+  // wmask := MuxLookup(Cat(io.ld_type), 0.U(8.W))(
+  //   Seq(Cat(LD_LB)   -> "b00000001".U,
+  //       Cat(LD_LH)   -> "b00000010".U,
+  //       Cat(LD_LW)   -> "b00000100".U,
+  //       Cat(LD_LBU)  -> "b00000001".U,
+  //       Cat(LD_LHU)  -> "b00000010".U,
+  //     ))
 
   wmask := MuxLookup(Cat(io.addr(1, 0), io.st_type), 0.U(8.W))(
     Seq(Cat(0.U(2.W), ST_SB)  -> "b00000001".U,

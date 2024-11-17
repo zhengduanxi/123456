@@ -18,7 +18,7 @@ class IFU(xlen:Int) extends Module {
     // IFU <=> Master interface
     val ACLK    = Input(Clock())
     val ARESETn = Input(Reset())
-    val mm      = Flipped(new MessageMM(xlen))
+    val mm      = Flipped(new MessageAXI4ToMaster(xlen))
   })
   
   val pc = Module(new PC(xlen, xlen))
@@ -90,13 +90,13 @@ class IFU(xlen:Int) extends Module {
   
   io.mm.ren   := ren
   io.mm.raddr := pc.io.pc_out
-  // io.mm.arsize := (xlen/8 - 1).U
+  io.mm.arsize := (xlen/8 - 1).U
   // do not need to write
   io.mm.wen   := 0.B
   io.mm.waddr := 0.U
   io.mm.wdata := 0.U
   io.mm.wmask := 0.U
-  // io.mm.awsize := (xlen/8 - 1).U
+  io.mm.awsize := (xlen/8 - 1).U
 
   io.out.valid := inst_valid
   io.in.ready  := 1.B

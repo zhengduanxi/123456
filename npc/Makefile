@@ -1,5 +1,5 @@
 # 定义顶级模块的名称
-TOPNAME = top
+TOPNAME = ysyxSoCFull
 
 # Verilator的可执行文件名称
 VERILATOR = verilator
@@ -11,6 +11,13 @@ VERILATOR_CFLAGS += -MMD --build -vpi -trace -cc  \
 # 添加gdb调试编译器标志
 VERILATOR_CFLAGS += --gdbbt
 CXXFLAGS += -DVL_DEBUG=1 -Og -ggdb3
+
+# soc
+VERILATOR_CFLAGS += --timescale "1ns/1ns" --no-timing
+
+# 添加额外的include目录到Verilator
+VERILATOR_CFLAGS += -I/home/zhengduanxi/ysyx-workbench/ysyxSoC/perip/uart16550/rtl
+VERILATOR_CFLAGS += -I/home/zhengduanxi/ysyx-workbench/ysyxSoC/perip/spi/rtl
 
 # 添加对 readline 库的编译器和链接器标志
 CXXFLAGS += $(shell pkg-config --cflags readline)
@@ -79,6 +86,9 @@ $(shell mkdir -p $(BUILD_DIR))
 
 # 定义Verilog源文件的搜索路径
 VSRCS = $(shell find $(abspath ./generated) -name "*.v" -or -name "*.sv")
+# soc
+VSRCS += $(shell find /home/zhengduanxi/ysyx-workbench/ysyxSoC/perip -name "*.v")
+VSRCS += /home/zhengduanxi/ysyx-workbench/ysyxSoC/build/ysyxSoCFull.v
 
 # 定义C/C++源文件的搜索路径
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")

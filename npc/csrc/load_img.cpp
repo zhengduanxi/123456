@@ -8,10 +8,10 @@
 
 // 包含Verilator提供的verilated.h头文件，这是进行Verilog模拟所必需的
 #include <verilated.h>
-// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为Vtop.h，它包含了模拟所需的类定义
-#include "Vtop.h"
+// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为VysyxSoCFull.h，它包含了模拟所需的类定义
+#include "VysyxSoCFull.h"
 // INCLUDE MODULE CLASSES
-#include "Vtop___024root.h"
+#include "VysyxSoCFull___024root.h"
 
 //static char *img_file = NULL;
 extern char *img_file;
@@ -107,7 +107,7 @@ long load_img() {//加载二进制指令
   buffer[waddr]   = (wdata & 0xFF000000);
 }*/
 
-extern Vtop *top;
+extern VysyxSoCFull *top;
 
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -119,7 +119,7 @@ const char *regs[] = {
 void isa_reg_display() {
     int length =  32;
     for(int i = 0  ; i < length ; i ++) {
-        printf("reg$%s ---> 0x%08x\n",regs[i], top->rootp->top__DOT__ifu__DOT__rf__DOT___GEN[i]);
+        printf("reg$%s ---> 0x%08x\n",regs[i], top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__rf__DOT___GEN[i]);
     }
 }
 
@@ -129,7 +129,7 @@ uint32_t isa_reg_str2val(const char *s, bool *success) {
     for(int i = 0  ; i < length ; i ++) {
         if(strcmp(s, regs[i]) == 0) {
             *success = true;
-            term = top->rootp->top__DOT__ifu__DOT__rf__DOT___GEN[i];
+            term = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__rf__DOT___GEN[i];
             //printf("%d\n", term);
             return term;
         }

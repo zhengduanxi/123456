@@ -137,3 +137,60 @@ class MessageMM(xlen: Int) extends Bundle {
   // val awsize = Input(UInt(3.W))
   val wdone  = Output(Bool())
 }
+
+// data: AXI4 Master Interface
+class MessageAXI4MasterInterface(xlen: Int) extends Bundle {
+  val awvalid = Output(Bool())
+  val awready = Input(Bool())
+  val awaddr  = Output(UInt(xlen.W))
+  val awid    = Output(UInt(4.W))
+  val awlen   = Output(UInt(8.W))
+  val awsize  = Output(UInt(3.W))
+  val awburst = Output(UInt(2.W))
+
+  // Write data channel
+  val wvalid  = Output(Bool())
+  val wready  = Input(Bool())
+  val wdata   = Output(UInt(xlen.W))
+  val wstrb   = Output(UInt((xlen/8).W))
+  val wlast   = Output(Bool())
+
+  // Write response channel
+  val bvalid  = Input(Bool())
+  val bready  = Output(Bool())
+  val bresp   = Input(UInt(2.W))
+  val bid     = Input(UInt(4.W))
+
+  // Read address channel
+  val arvalid = Output(Bool())
+  val arready = Input(Bool())
+  val araddr  = Output(UInt(xlen.W))
+  val arid    = Output(UInt(4.W))
+  val arlen   = Output(UInt(8.W))
+  val arsize  = Output(UInt(3.W))
+  val arburst = Output(UInt(2.W))
+
+  // Read data channel
+  val rvalid  = Input(Bool())
+  val rready  = Output(Bool())
+  val rdata   = Input(UInt(xlen.W))
+  val rresp   = Input(UInt(2.W))
+  val rlast   = Input(Bool())
+  val rid     = Input(UInt(4.W))
+}
+
+// data: AXI4 Master interface <=> Master
+class MessageAXI4ToMaster(xlen: Int) extends Bundle {
+  val ren    = Input(Bool())
+  val raddr  = Input(UInt(xlen.W))
+  val arsize = Input(UInt(3.W))
+  val rdata  = Output(UInt(xlen.W))
+  val rvalid = Output(Bool())
+
+  val wen    = Input(Bool())
+  val waddr  = Input(UInt(xlen.W))
+  val wdata  = Input(UInt(xlen.W))
+  val wmask  = Input(UInt(8.W))
+  val awsize = Input(UInt(3.W))
+  val wdone  = Output(Bool())
+}

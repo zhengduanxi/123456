@@ -1,17 +1,17 @@
 // 包含Verilator提供的verilated.h头文件，这是进行Verilog模拟所必需的
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为Vtop.h，它包含了模拟所需的类定义
-#include "Vtop.h"
+// 包含由Verilator从Verilog代码生成的C++头文件，通常命名为VysyxSoCFull.h，它包含了模拟所需的类定义
+#include "VysyxSoCFull.h"
 // INCLUDE MODULE CLASSES
-#include "Vtop___024root.h"
+#include "VysyxSoCFull___024root.h"
 
 #include <cstdio>
 #include "common.h"
 #include "log.h"
 
 extern vluint64_t sim_time;
-extern Vtop *top;
+extern VysyxSoCFull *top;
 extern VerilatedVcdC *m_trace;
 
 extern NPCState npc_state;
@@ -48,7 +48,7 @@ void cpu_exec(uint32_t n){
         }
 
     for(int x = 0  ; x < 32 ; x ++) {
-        cpu.gpr[x] = top->rootp->top__DOT__ifu__DOT__rf__DOT___GEN[x];
+        cpu.gpr[x] = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__rf__DOT___GEN[x];
     }
     if (top->clock != 1){
         #ifdef CONFIG_DIFFTEST
@@ -58,7 +58,7 @@ void cpu_exec(uint32_t n){
         if (difftest_valid){
           // if (top->rootp->top__DOT__ifu__DOT__pc__DOT__pc <= 0x87ffffff){
           // printf("%x\n", cpu.pc);
-          difftest_step(top->rootp->top__DOT__ifu__DOT__pc__DOT__pc, cpu.pc);
+          difftest_step(top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__pc__DOT__pc, cpu.pc);
           // }
         }
         #endif

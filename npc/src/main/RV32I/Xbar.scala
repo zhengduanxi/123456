@@ -36,19 +36,19 @@ class Xbar(xlen:Int) extends Module {
     switch(curr_status) {
       is(sIDEL) {
         when (io.ax.AWVALID && io.ax.AWADDR >= "h1000_0000".U(xlen.W) && io.ax.AWADDR <= "h1000_0fff".U(xlen.W)) {
-          next_status := sDSRAM
+          next_status := sUART
         } .elsewhen (io.ax.ARVALID && io.ax.ARADDR >= "h1000_0000".U(xlen.W) && io.ax.ARADDR <= "h1000_0fff".U(xlen.W)) {
-          next_status := sDSRAM   // TODO: UART does not implement read function
+          next_status := sUART   // TODO: UART does not implement read function
         } .elsewhen (io.ax.AWVALID && io.ax.AWADDR >= "h8000_0000".U(xlen.W) && io.ax.AWADDR <= "h80ff_ffff".U(xlen.W)) {
           next_status := sDSRAM
         } .elsewhen (io.ax.ARVALID && io.ax.ARADDR >= "h8000_0000".U(xlen.W) && io.ax.ARADDR <= "h80ff_ffff".U(xlen.W)) {
           next_status := sDSRAM
         } .elsewhen (io.ax.AWVALID && io.ax.AWADDR >= "ha000_0048".U(xlen.W) && io.ax.AWADDR <= "ha000_004c".U(xlen.W)) {
-          next_status := sDSRAM  // TODO: CLINT does not implement write function
+          next_status := sCLINT  // TODO: CLINT does not implement write function
         } .elsewhen (io.ax.ARVALID && io.ax.ARADDR >= "ha000_0048".U(xlen.W) && io.ax.ARADDR <= "ha000_004c".U(xlen.W)) {
-          next_status := sDSRAM
+          next_status := sCLINT
         } .otherwise {
-          next_status := sDSRAM
+          next_status := sIDEL
         }
       }
 
