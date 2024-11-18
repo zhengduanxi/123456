@@ -201,5 +201,91 @@ class Xbar(xlen:Int) extends Module {
     io.ax.RID     := Mux(curr_status===sUART,  io.xbar_uart.RID,
                      Mux(curr_status===sDSRAM, io.xbar_dsram.RID,
                      Mux(curr_status===sCLINT, io.xbar_clint.RID,     0.U)))
+
+/*     // Xbar => UART
+    // Write address channel
+    io.xbar_uart.AWVALID := Mux(curr_status===sUART, io.ax.AWVALID, 0.B)
+    io.xbar_uart.AWADDR  := Mux(curr_status===sUART, io.ax.AWADDR,  0.U)
+    io.xbar_uart.AWPROT  := Mux(curr_status===sUART, io.ax.AWPROT,  0.U)
+    // Write data channel
+    io.xbar_uart.WVALID  := Mux(curr_status===sUART, io.ax.WVALID,  0.B)
+    io.xbar_uart.WDATA   := Mux(curr_status===sUART, io.ax.WDATA,   0.U)
+    io.xbar_uart.WSTRB   := Mux(curr_status===sUART, io.ax.WSTRB,   0.U)
+    // Write response channel
+    io.xbar_uart.BREADY  := Mux(curr_status===sUART, io.ax.BREADY,  0.B)
+    // Read address channel
+    io.xbar_uart.ARVALID := Mux(curr_status===sUART, io.ax.ARVALID, 0.B)
+    io.xbar_uart.ARADDR  := Mux(curr_status===sUART, io.ax.ARADDR,  0.U)
+    io.xbar_uart.ARPROT  := Mux(curr_status===sUART, io.ax.ARPROT,  0.U)
+    // Read data channel
+    io.xbar_uart.RREADY  := Mux(curr_status===sUART, io.ax.RREADY,  0.B)
+
+    // Xbar => DSRAM
+    // Write address channel
+    io.xbar_dsram.AWVALID := Mux(curr_status===sDSRAM, io.ax.AWVALID, 0.B)
+    io.xbar_dsram.AWADDR  := Mux(curr_status===sDSRAM, io.ax.AWADDR,  0.U)
+    io.xbar_dsram.AWPROT  := Mux(curr_status===sDSRAM, io.ax.AWPROT,  0.U)
+    // Write data channel
+    io.xbar_dsram.WVALID  := Mux(curr_status===sDSRAM, io.ax.WVALID,  0.B)
+    io.xbar_dsram.WDATA   := Mux(curr_status===sDSRAM, io.ax.WDATA,   0.U)
+    io.xbar_dsram.WSTRB   := Mux(curr_status===sDSRAM, io.ax.WSTRB,   0.U)
+    // Write response channel
+    io.xbar_dsram.BREADY  := Mux(curr_status===sDSRAM, io.ax.BREADY,  0.B)
+    // Read address channel
+    io.xbar_dsram.ARVALID := Mux(curr_status===sDSRAM, io.ax.ARVALID, 0.B)
+    io.xbar_dsram.ARADDR  := Mux(curr_status===sDSRAM, io.ax.ARADDR,  0.U)
+    io.xbar_dsram.ARPROT  := Mux(curr_status===sDSRAM, io.ax.ARPROT,  0.U)
+    // Read data channel
+    io.xbar_dsram.RREADY  := Mux(curr_status===sDSRAM, io.ax.RREADY,  0.B)
+
+    // Xbar => CLINT
+    // Write address channel
+    io.xbar_clint.AWVALID := Mux(curr_status===sCLINT, io.ax.AWVALID, 0.B)
+    io.xbar_clint.AWADDR  := Mux(curr_status===sCLINT, io.ax.AWADDR,  0.U)
+    io.xbar_clint.AWPROT  := Mux(curr_status===sCLINT, io.ax.AWPROT,  0.U)
+    // Write data channel
+    io.xbar_clint.WVALID  := Mux(curr_status===sCLINT, io.ax.WVALID,  0.B)
+    io.xbar_clint.WDATA   := Mux(curr_status===sCLINT, io.ax.WDATA,   0.U)
+    io.xbar_clint.WSTRB   := Mux(curr_status===sCLINT, io.ax.WSTRB,   0.U)
+    // Write response channel
+    io.xbar_clint.BREADY  := Mux(curr_status===sCLINT, io.ax.BREADY,  0.B)
+    // Read address channel
+    io.xbar_clint.ARVALID := Mux(curr_status===sCLINT, io.ax.ARVALID, 0.B)
+    io.xbar_clint.ARADDR  := Mux(curr_status===sCLINT, io.ax.ARADDR,  0.U)
+    io.xbar_clint.ARPROT  := Mux(curr_status===sCLINT, io.ax.ARPROT,  0.U)
+    // Read data channel
+    io.xbar_clint.RREADY  := Mux(curr_status===sCLINT, io.ax.RREADY,  0.B)
+
+    // slaves(UART , DSRAM and CLINT) => Xbar
+    // Write address channel
+    io.ax.AWREADY := Mux(curr_status===sUART,  io.xbar_uart.AWREADY,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.AWREADY,
+                     Mux(curr_status===sCLINT, io.xbar_clint.AWREADY, 0.B)))
+    // Write data channel
+    io.ax.WREADY  := Mux(curr_status===sUART,  io.xbar_uart.WREADY,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.WREADY,
+                     Mux(curr_status===sCLINT, io.xbar_clint.WREADY,  0.B)))
+    // Write response channel
+    io.ax.BVALID  := Mux(curr_status===sUART,  io.xbar_uart.BVALID,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.BVALID,
+                     Mux(curr_status===sCLINT, io.xbar_clint.BVALID,  0.B)))
+    io.ax.BRESP   := Mux(curr_status===sUART,  io.xbar_uart.BRESP,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.BRESP,
+                     Mux(curr_status===sCLINT, io.xbar_clint.BRESP,   0.U)))
+    // Read address channel
+    io.ax.ARREADY := Mux(curr_status===sUART, io.xbar_uart.ARREADY,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.ARREADY,
+                     Mux(curr_status===sCLINT, io.xbar_clint.ARREADY, 0.B)))
+    // Read data channel
+    io.ax.RVALID  := Mux(curr_status===sUART, io.xbar_uart.RVALID,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.RVALID,
+                     Mux(curr_status===sCLINT, io.xbar_clint.RVALID,  0.B)))
+    io.ax.RDATA   := Mux(curr_status===sUART, io.xbar_uart.RDATA,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.RDATA,
+                     Mux(curr_status===sCLINT, io.xbar_clint.RDATA,   0.U)))
+    io.ax.RRESP   := Mux(curr_status===sUART, io.xbar_uart.RRESP,
+                     Mux(curr_status===sDSRAM, io.xbar_dsram.RRESP,
+                     Mux(curr_status===sCLINT, io.xbar_clint.RRESP,   0.U))) */
+
   }
 }

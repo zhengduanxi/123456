@@ -42,7 +42,7 @@ class PC(val dataWidth: Int, val addrWidth: Int) extends Module {
   //   printf(p"pc_in = 0x${Hexadecimal(pc_in)}\n")
   // }
 
-  pc := Mux(reset.asBool, "h80000000".U(addrWidth.W), Mux(io.wen, pc_in, pc))
+  pc := Mux(reset.asBool, "h20000000".U(addrWidth.W), Mux(io.wen, pc_in, pc))
   get_cpu_pc.io.PCNext := pc_in
   io.pc_out := pc
 }
